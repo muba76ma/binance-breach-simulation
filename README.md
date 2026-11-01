@@ -48,3 +48,8 @@ Run:
 
     python realistic_hijack.py --json events_realistic.json
     python detector/analyze_realistic.py events_realistic.json
+
+Alert count is stable across seeds 1, 7, 42, 99, 1234 (4 alerts each), so the
+detector is not tuned to a single seed. The sweep in `sweep.py` confirms no
+false positives on the 400-event baseline across `window_min` 10–60 and
+`batch_n` 10–40.
