@@ -113,13 +113,13 @@ class ChainDetector:
                                f"${sum(w.amount_usd for w in wd):,.0f} within "
                                f"{(wd[-1].ts - cont.ts).total_seconds()/60:.1f}min "
                                f"of container login"))
-                cont, wd = None, []
+                wd = []   # keep `cont` so EIP7702_BATCH can still fire
 
         seeds = [e for e in events if e.kind == "seed_funding"]
-        if seeds:
-            alerts.append(("PREP_THEN_EXECUTE", seeds[-1],
+        if seeds and sess:
+            alerts.append(("PREP_THEN_EXECUTE", sess,
                            f"{len(seeds)} synthetic seed-funding events "
-                           f"(tornado-cash-synthetic) before execution"))
+                           f"(tornado-cash-synthetic) in the 10h prior"))
         return alerts
 
 
@@ -131,7 +131,11 @@ def report(events, alerts):
         lat = (ev.ts - exec0.ts).total_seconds() / 60
         drained = sum(w.amount_usd for w in events
                       if w.kind == "withdrawal" and w.ts <= ev.ts)
-        print(f"[{name}] t+{lat:.1f}min from token reuse")
+        if lat < 0:
+            print(f"[{name}] t{lat:+.1f}min (early warning, "
+                  f"{abs(lat):.0f}min before drain starts)")
+        else:
+            print(f"[{name}] t+{lat:.1f}min from token reuse")
         print(f"  {msg}")
         print(f"  simulated funds left before alert: ${drained:,.0f}\n")
 
