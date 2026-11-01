@@ -4,3 +4,5 @@ __pycache__/
 data/*.jsonl
 reports/*.md
 
+events_realistic.json
+realistic_events.json
